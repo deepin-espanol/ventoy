@@ -1,0 +1,31 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Ventoy
+GenericName=Multiboot USB Creator
+Comment=Create a multiboot USB drive easily and quickly
+Icon=ventoy
+Exec=/opt/apps/ventoy/VentoyGUI.x86_64
+Terminal=false
+StartupNotify=false
+Categories=System;Utility;
+Keywords=usb;multiboot;bootable;iso;
+
+# Translations
+Comment[es]=Crea un USB multiboot de manera fácil y rápida
+Comment[pt]=Crie um USB multiboot de forma fácil e rápida
+Comment[pt_BR]=Crie um USB multiboot de forma fácil e rápida
+Comment[fr]=Créer un USB multiboot facilement et rapidement
+Comment[it]=Crea un USB multiboot in modo facile e veloce
+Comment[ru]=Создайте мультизагрузочный USB легко и быстро
+Comment[zh_CN]=轻松快速创建多启动USB
+Comment[zh_TW]=輕鬆快速創建多啟動USB
+
+GenericName[es]=Creador de USB Multiboot
+GenericName[pt]=Criador de USB Multiboot
+GenericName[pt_BR]=Criador de USB Multiboot
+GenericName[fr]=Créateur USB Multiboot
+GenericName[it]=Creatore USB Multiboot
+GenericName[ru]=Создатель мультизагрузочного USB
+GenericName[zh_CN]=多启动USB创建器
+GenericName[zh_TW]=多啟動USB創建器

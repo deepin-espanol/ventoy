@@ -1,0 +1,2 @@
+# This file ensures the ventoy directory is tracked by git
+# The actual Ventoy files will be downloaded during the build process

@@ -1,0 +1,34 @@
+# Build artifacts
+*.deb
+ventoy_*
+
+# Downloaded Ventoy files
+data/opt/apps/ventoy/*
+!data/opt/apps/ventoy/.gitkeep
+
+# Temporary files
+/tmp/
+*.tar.gz
+*.bak
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Linux
+*~
+.directory
+
+# Backup files
+control/control.bak
+control/md5sums.bak
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log

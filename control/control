@@ -1,0 +1,14 @@
+Package: ventoy
+Version: 1.1.10-1+deepines
+Installed-Size: 23660
+Maintainer: Alvaro Samudio <alvarosamudio@protonmail.com>
+Section: system
+Architecture: amd64
+Priority: optional
+Depends: dpkg (>= 1.5), sed (>=4.5), grep (>=3.1), coreutils (>=8.20)
+Replaces: ventoy (<=1.0.46-1)
+Conflicts: 
+Pre-Depends: dpkg (>= 1.5)
+Description: Multiboot USB
+ Crea un multiboot USB de manera muy fácil y rápida.
+

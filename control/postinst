@@ -1,0 +1,26 @@
+#!/bin/bash
+set -e
+
+# Script post-instalación para Ventoy
+
+# Establecer permisos correctos para los binarios
+chmod +x /opt/apps/ventoy/Ventoy2Disk.sh 2>/dev/null || true
+chmod +x /opt/apps/ventoy/VentoyWeb.sh 2>/dev/null || true
+chmod +x /opt/apps/ventoy/VentoyGUI.* 2>/dev/null || true
+chmod +x /opt/apps/ventoy/VentoyPlugson.sh 2>/dev/null || true
+find /opt/apps/ventoy -name "*.sh" -exec chmod +x {} \; 2>/dev/null || true
+
+# Actualizar cache de iconos
+if command -v gtk-update-icon-cache >/dev/null 2>&1; then
+    gtk-update-icon-cache -f -t /usr/share/icons/hicolor 2>/dev/null || true
+fi
+
+# Actualizar base de datos de aplicaciones
+if command -v update-desktop-database >/dev/null 2>&1; then
+    update-desktop-database /usr/share/applications 2>/dev/null || true
+fi
+
+echo "Ventoy instalado correctamente en /opt/apps/ventoy"
+echo "Puedes ejecutarlo desde el menú de aplicaciones o con: /opt/apps/ventoy/VentoyGUI.x86_64"
+
+exit 0
