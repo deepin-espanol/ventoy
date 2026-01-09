@@ -82,7 +82,7 @@ jobs:
           VERSION="${{ steps.ventoy_version.outputs.version }}"
           INSTALLED_SIZE="${{ steps.package_size.outputs.installed_size }}"
 
-          sed -i "s/^Version:.*/Version: $VERSION-1+deepines/" control/control
+          sed -i "s/^Version:.*/Version: $VERSION-2+deepines/" control/control
           sed -i "s/^Installed-Size:.*/Installed-Size: $INSTALLED_SIZE/" control/control
 
       - name: Generate MD5 checksums
@@ -94,7 +94,7 @@ jobs:
       - name: Build DEB package
         run: |
           VERSION="${{ steps.ventoy_version.outputs.version }}"
-          PACKAGE_NAME="ventoy_${VERSION}-1+deepines_amd64"
+          PACKAGE_NAME="ventoy_${VERSION}-2+deepines_amd64"
 
           # Crear estructura para dpkg-deb
           mkdir -p "$PACKAGE_NAME/DEBIAN"
@@ -102,7 +102,7 @@ jobs:
           cp -r $BUILD_DIR/* "$PACKAGE_NAME/"
 
           # Construir el paquete
-          dpkg-deb --build --root-owner-group "$PACKAGE_NAME"
+          dpkg-deb -Zxz -z9 --build --root-owner-group "$PACKAGE_NAME"
 
           # Guardar información del paquete
           echo "PACKAGE_FILE=${PACKAGE_NAME}.deb" >> $GITHUB_ENV
@@ -155,7 +155,7 @@ jobs:
 
             ## 📋 Información del Paquete
 
-            - **Versión**: ${{ steps.ventoy_version.outputs.version }}-1+deepines
+            - **Versión**: ${{ steps.ventoy_version.outputs.version }}-2+deepines
             - **Arquitectura**: amd64
             - **Mantenedor**: Deepin en Español
             - **Licencia**: GPL v3+
