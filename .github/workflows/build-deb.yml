@@ -39,24 +39,27 @@ jobs:
 
       - name: Prepare package structure
         run: |
-          # Limpiar directorio de destino si existe
-          rm -rf data/opt/apps/ventoy/*
+          # Crear directorio temporal para construcción
+          BUILD_DIR="build_temp"
+          rm -rf "$BUILD_DIR"
+          mkdir -p "$BUILD_DIR/opt/apps/ventoy"
 
-          # Copiar archivos de Ventoy a la estructura del paquete
-          mkdir -p data/opt/apps/ventoy
-          cp -r $VENTOY_DIR/* data/opt/apps/ventoy/
+          # Copiar archivos de Ventoy
+          cp -r $VENTOY_DIR/* "$BUILD_DIR/opt/apps/ventoy/"
+
+          # Copiar estructura de datos existente (iconos, desktop, etc)
+          cp -r data/usr "$BUILD_DIR/"
 
           # Establecer permisos correctos
-          chmod +x data/opt/apps/ventoy/Ventoy2Disk.sh
-          chmod +x data/opt/apps/ventoy/VentoyWeb.sh
-          chmod +x data/opt/apps/ventoy/VentoyGUI.*
-          chmod +x data/opt/apps/ventoy/VentoyPlugson.sh
-          chmod +x data/opt/apps/ventoy/*.sh
+          find "$BUILD_DIR/opt/apps/ventoy" -name "*.sh" -exec chmod +x {} \;
+          chmod +x "$BUILD_DIR/opt/apps/ventoy/VentoyGUI."* 2>/dev/null || true
+
+          echo "BUILD_DIR=$BUILD_DIR" >> $GITHUB_ENV
 
       - name: Calculate installed size
         id: package_size
         run: |
-          INSTALLED_SIZE=$(du -sk data | cut -f1)
+          INSTALLED_SIZE=$(du -sk $BUILD_DIR | cut -f1)
           echo "installed_size=$INSTALLED_SIZE" >> $GITHUB_OUTPUT
           echo "Installed size: $INSTALLED_SIZE KB"
 
@@ -70,7 +73,7 @@ jobs:
 
       - name: Generate MD5 checksums
         run: |
-          cd data
+          cd $BUILD_DIR
           find . -type f -exec md5sum {} \; > ../control/md5sums
           cd ..
 
@@ -79,40 +82,78 @@ jobs:
           VERSION="${{ steps.ventoy_version.outputs.version }}"
           PACKAGE_NAME="ventoy_${VERSION}-1+deepines_amd64"
 
-          # Crear estructura temporal para dpkg-deb
+          # Crear estructura para dpkg-deb
           mkdir -p "$PACKAGE_NAME/DEBIAN"
           cp -r control/* "$PACKAGE_NAME/DEBIAN/"
-          cp -r data/* "$PACKAGE_NAME/"
+          cp -r $BUILD_DIR/* "$PACKAGE_NAME/"
 
           # Construir el paquete
-          dpkg-deb --build "$PACKAGE_NAME"
+          dpkg-deb --build --root-owner-group "$PACKAGE_NAME"
 
+          # Guardar información del paquete
           echo "PACKAGE_FILE=${PACKAGE_NAME}.deb" >> $GITHUB_ENV
+          echo "PACKAGE_NAME=${PACKAGE_NAME}" >> $GITHUB_ENV
+
+          # Verificar el paquete
+          echo "=== Package Info ==="
+          dpkg-deb --info "${PACKAGE_NAME}.deb"
+          echo ""
+          echo "=== Package Contents (first 20 files) ==="
+          dpkg-deb --contents "${PACKAGE_NAME}.deb" | head -20
+          echo ""
+          echo "=== Package Size ==="
+          ls -lh "${PACKAGE_NAME}.deb"
 
       - name: Upload DEB package as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ventoy-deb-package
+          name: ventoy-deb-${{ steps.ventoy_version.outputs.version }}
           path: "*.deb"
           retention-days: 90
+          compression-level: 0
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: v${{ steps.ventoy_version.outputs.version }}
-          name: Ventoy ${{ steps.ventoy_version.outputs.version }} DEB Package
+          name: Ventoy ${{ steps.ventoy_version.outputs.version }} - Paquete DEB
           body: |
-            Paquete DEB de Ventoy ${{ steps.ventoy_version.outputs.version }} para Debian/Ubuntu
+            # 📦 Ventoy ${{ steps.ventoy_version.outputs.version }} - Paquete DEB para Deepin/Debian/Ubuntu
 
-            Construido automáticamente desde la versión oficial de Ventoy.
+            Paquete Debian construido automáticamente desde la [versión oficial de Ventoy](https://github.com/ventoy/Ventoy/releases/tag/v${{ steps.ventoy_version.outputs.version }}).
 
-            **Instalación:**
+            ## 📥 Instalación
+
             ```bash
+            # Descargar el paquete
+            wget https://github.com/deepin-espanol/ventoy/releases/download/v${{ steps.ventoy_version.outputs.version }}/${{ env.PACKAGE_FILE }}
+
+            # Instalar
             sudo dpkg -i ${{ env.PACKAGE_FILE }}
             sudo apt-get install -f
             ```
+
+            ## 🚀 Uso
+
+            Después de la instalación, ejecuta Ventoy desde:
+            - **Menú de aplicaciones**: Busca "Ventoy"
+            - **Terminal**: `/opt/apps/ventoy/VentoyGUI.x86_64`
+
+            ## 📋 Información del Paquete
+
+            - **Versión**: ${{ steps.ventoy_version.outputs.version }}-1+deepines
+            - **Arquitectura**: amd64
+            - **Mantenedor**: Deepin en Español
+            - **Licencia**: GPL v3+
+
+            ## 🔗 Enlaces
+
+            - [Ventoy Oficial](https://www.ventoy.net/)
+            - [Repositorio Ventoy](https://github.com/ventoy/Ventoy)
+            - [Documentación](https://www.ventoy.net/en/doc_start.html)
           files: "*.deb"
           draft: false
           prerelease: false
+          make_latest: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
