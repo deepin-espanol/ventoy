@@ -34,8 +34,20 @@ jobs:
         run: |
           wget -O ventoy.tar.gz "${{ steps.ventoy_version.outputs.download_url }}"
           tar -xzf ventoy.tar.gz
-          VENTOY_DIR=$(tar -tzf ventoy.tar.gz | head -1 | cut -f1 -d"/")
+
+          # Obtener el nombre del directorio extraído
+          VENTOY_DIR=$(tar -tzf ventoy.tar.gz | head -1 | cut -f1 -d"/" | grep -v '^$')
+
+          # Verificar que se obtuvo un nombre válido
+          if [ -z "$VENTOY_DIR" ] || [ "$VENTOY_DIR" = "." ]; then
+            echo "Error: No se pudo determinar el directorio de Ventoy"
+            ls -la
+            exit 1
+          fi
+
           echo "VENTOY_DIR=$VENTOY_DIR" >> $GITHUB_ENV
+          echo "Ventoy directory: $VENTOY_DIR"
+          ls -la "$VENTOY_DIR" | head -10
 
       - name: Prepare package structure
         run: |
