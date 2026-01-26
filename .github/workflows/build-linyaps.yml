@@ -18,7 +18,7 @@ jobs:
       - name: Install dependencies
         run: |
           apt-get update
-          apt-get install -y wget curl jq git linglong-builder
+          apt-get install -y wget curl jq git linglong-builder linglong-box linglong-bin
 
       - name: Checkout repository
         uses: actions/checkout@v4
