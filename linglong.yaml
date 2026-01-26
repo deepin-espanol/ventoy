@@ -1,0 +1,28 @@
+version: "1"
+package:
+  id: net.ventoy.ventoy
+  name: Ventoy
+  version: 1.0.14
+  kind: app
+  description: |
+    Ventoy is an open source tool to create bootable USB drive for ISO/WIM/IMG/VHD(x)/EFI files.
+    With ventoy, you don't need to format the disk over and over, you just need to copy the ISO/WIM/IMG/VHD(x)/EFI files to the USB drive and boot them directly.
+    You can copy many files at a time and ventoy will give you a boot menu to select them.
+
+command:
+  - /opt/apps/net.ventoy.ventoy/files/VentoyGUI.x86_64
+
+base: org.deepin.foundation/23.0.0
+permissions:
+  - device
+  - network
+  - system_admin
+  - notification
+
+sources:
+  - kind: manual
+    name: ventoy_files
+
+build: |
+  mkdir -p $PREFIX/files
+  cp -r ventoy_files/* $PREFIX/files/

@@ -1,0 +1,88 @@
+name: Build Ventoy Linyaps Package
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * 0"
+
+jobs:
+  build-linyaps:
+    runs-on: ubuntu-latest
+    container:
+      image: linuxdeepin/deepin:23
+      options: --privileged
+    outputs:
+      version: ${{ steps.ventoy_version.outputs.version }}
+
+    steps:
+      - name: Install dependencies
+        run: |
+          apt-get update
+          apt-get install -y wget curl jq git linglong-builder
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Get latest Ventoy version
+        id: ventoy_version
+        run: |
+          LATEST_RELEASE=$(curl -s https://api.github.com/repos/ventoy/Ventoy/releases/latest)
+          VERSION=$(echo "$LATEST_RELEASE" | jq -r '.tag_name' | sed 's/^v//')
+          DOWNLOAD_URL=$(echo "$LATEST_RELEASE" | jq -r '.assets[] | select(.name | contains("linux.tar.gz")) | .browser_download_url')
+
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "download_url=$DOWNLOAD_URL" >> $GITHUB_OUTPUT
+          echo "Latest Ventoy version: $VERSION"
+
+      - name: Prepare Sources
+        run: |
+          wget -O ventoy.tar.gz "${{ steps.ventoy_version.outputs.download_url }}"
+          tar -xzf ventoy.tar.gz
+
+          # Find extracted dir
+          VENTOY_DIR=$(ls -d ventoy-* | grep -v tar.gz | head -1)
+
+          # Rename to match linglong.yaml source name
+          mv "$VENTOY_DIR" ventoy_files
+
+          # Update linglong.yaml version
+          sed -i "s/^  version: .*/  version: ${{ steps.ventoy_version.outputs.version }}/" linglong.yaml
+
+      - name: Build Linyaps
+        run: |
+          ll-builder build
+
+      - name: Export Linyaps
+        run: |
+          ll-builder export
+
+      - name: List files
+        run: ls -lh
+
+      - name: Upload Linyaps package
+        uses: actions/upload-artifact@v4
+        with:
+          name: ventoy-linyaps-${{ steps.ventoy_version.outputs.version }}
+          path: |
+            *.layer
+            *.uab
+
+  publish-linyaps:
+    needs: build-linyaps
+    runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request'
+    steps:
+      - name: Download Linyaps package
+        uses: actions/download-artifact@v4
+        with:
+          name: ventoy-linyaps-${{ needs.build-linyaps.outputs.version }}
+
+      - name: Upload to Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ needs.build-linyaps.outputs.version }}
+          files: |
+            *.layer
+            *.uab
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
