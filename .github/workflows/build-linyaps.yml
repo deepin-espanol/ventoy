@@ -26,9 +26,9 @@ jobs:
       - name: Get latest Ventoy version
         id: ventoy_version
         run: |
-          LATEST_RELEASE=$(curl -s https://api.github.com/repos/ventoy/Ventoy/releases/latest)
-          VERSION=$(echo "$LATEST_RELEASE" | jq -r '.tag_name' | sed 's/^v//')
-          DOWNLOAD_URL=$(echo "$LATEST_RELEASE" | jq -r '.assets[] | select(.name | contains("linux.tar.gz")) | .browser_download_url')
+          curl -s https://api.github.com/repos/ventoy/Ventoy/releases/latest -o release.json
+          VERSION=$(jq -r '.tag_name' release.json | sed 's/^v//')
+          DOWNLOAD_URL=$(jq -r '.assets[] | select(.name | contains("linux.tar.gz")) | .browser_download_url' release.json)
 
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "download_url=$DOWNLOAD_URL" >> $GITHUB_OUTPUT
