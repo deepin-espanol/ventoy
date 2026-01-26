@@ -46,7 +46,7 @@ jobs:
           mv "$VENTOY_DIR" ventoy_files
 
           # Update linglong.yaml version
-          sed -i "s/^  version: .*/  version: ${{ steps.ventoy_version.outputs.version }}/" linglong.yaml
+          sed -i "s/^  version: .*/  version: ${{ steps.ventoy_version.outputs.version }}.0/" linglong.yaml
 
       - name: Build Linyaps
         run: |
