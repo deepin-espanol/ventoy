@@ -2,7 +2,7 @@ version: "1"
 package:
   id: net.ventoy.ventoy
   name: Ventoy
-  version: 1.1.11.0
+  version: 1.1.12.0
   kind: app
   description: |
     Ventoy is an open source tool to create bootable USB drive for ISO/WIM/IMG/VHD(x)/EFI files.
