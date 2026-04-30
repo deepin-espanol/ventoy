@@ -85,6 +85,16 @@ jobs:
           sed -i "s/^Version:.*/Version: $VERSION+deepines/" control/control
           sed -i "s/^Installed-Size:.*/Installed-Size: $INSTALLED_SIZE/" control/control
 
+      - name: Commit updated version files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add control/control linglong.yaml
+          git diff --staged --quiet || git commit -m "chore: bump version to ${{ steps.ventoy_version.outputs.version }}"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Generate MD5 checksums
         run: |
           cd $BUILD_DIR
